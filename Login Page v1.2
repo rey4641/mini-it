@@ -1,0 +1,128 @@
+#modules
+import customtkinter as ctk
+import tkinter as tk
+ 
+# Sets the appearance of the window
+# Supported modes : Light, Dark, System
+ctk.set_appearance_mode("System")   
+ 
+# Sets the color of the widgets in the window
+# Supported themes : green, dark-blue, blue    
+ctk.set_default_color_theme("dark-blue")    
+ 
+# Dimensions of the window
+appWidth, appHeight = 600, 500
+ 
+ 
+# App Class
+class App(ctk.CTk):
+    # The layout of the window will be written
+    # in the init function itself
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+ 
+        # Sets the title of the window to "App"
+        self.title("Welcome")   
+        # Sets the dimensions of the window to 600x700
+        self.geometry(f"{appWidth}x{appHeight}")    
+ 
+        # Name Label
+        self.nameLabel = ctk.CTkLabel(self,
+                                text="Username")
+        self.nameLabel.grid(row=0, column=0,
+                            padx=20, pady=20,
+                            sticky="ew")
+ 
+        # Name Entry Field
+        self.nameEntry = ctk.CTkEntry(self,
+                          placeholder_text="1221101234 , MU001234")
+        self.nameEntry.grid(row=0, column=1,
+                            columnspan=3, padx=20,
+                            pady=20, sticky="ew")
+ 
+        # Age Label
+        self.pwLabel = ctk.CTkLabel(self, text="Password")
+        self.pwLabel.grid(row=1, column=0,
+                           padx=20, pady=20,
+                           sticky="ew")
+                           
+        # Age Entry Field
+        self.pwEntry = ctk.CTkEntry(self, placeholder_text="********")
+        self.pwEntry.grid(row=1, column=1,
+                           columnspan=3, padx=20,
+                           pady=20, sticky="ew")
+ 
+        # Gender Label
+        self.genderLabel = ctk.CTkLabel(self,
+                                  text="Gender")
+        self.genderLabel.grid(row=2, column=0, 
+                              padx=20, pady=20,
+                              sticky="ew")
+ 
+        # Gender Radio Buttons
+        self.maleRadioButton = ctk.CTkRadioButton(self,
+                                   text="Male")
+        self.maleRadioButton.grid(row=2, column=1,
+                                  padx=20, pady=20,
+                                  sticky="ew")
+ 
+        self.femaleRadioButton = ctk.CTkRadioButton(self,
+                                     text="Female")
+        self.femaleRadioButton.grid(row=2, column=2,
+                                    padx=20, pady=20,
+                                    sticky="ew")
+        
+        '''# Choice Label
+        self.choiceLabel = ctk.CTkLabel(self,
+                                        text="Choice")
+        self.choiceLabel.grid(row=3, column=0,
+                              padx=20, pady=20,
+                              sticky="ew")
+ 
+        # Choice Check boxes
+        self.checkboxVar = tk.StringVar(value="Choice 1")
+         
+        self.choice1 = ctk.CTkCheckBox(self,
+                             text="choice 1",
+                             variable=self.checkboxVar,
+                             onvalue="choice1", offvalue="c1")
+        self.choice1.grid(row=3, column=1,
+                          padx=20, pady=20,
+                          sticky="ew")
+ 
+        self.choice2 = ctk.CTkCheckBox(self,
+                            text="choice 2",
+                            variable=self.checkboxVar,
+                            onvalue="choice2",
+                            offvalue="c2")                               
+        self.choice2.grid(row=3, column=2,
+                          padx=20, pady=20,
+                          sticky="ew")'''
+ 
+        # Occupation Label
+        self.occupationLabel = ctk.CTkLabel(self,
+                                    text="Occupation")
+        self.occupationLabel.grid(row=4, column=0,
+                                  padx=20, pady=20,
+                                  sticky="ew")
+ 
+        # Occupation combo box
+        self.occupationOptionMenu = ctk.CTkOptionMenu(self,
+                                       values=["Student",
+                                       "Lecturer","Admin"])
+        self.occupationOptionMenu.grid(row=4, column=1,
+                                       padx=20, pady=20,
+                                       columnspan=2, sticky="ew")
+ 
+        # Generate Button
+        self.signinButton = ctk.CTkButton(self,
+                                         text="Sign In")
+        self.signinButton.grid(row=5, column=1,
+                                        columnspan=2, padx=20, 
+                                        pady=20, sticky="ew")
+ 
+ 
+if __name__ == "__main__":
+    app = App()
+    # Used to run the application
+    app.mainloop()      
