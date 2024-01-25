@@ -1,0 +1,95 @@
+import os
+import base64
+import webbrowser
+import pyotp
+import tkinter as tk
+import customtkinter as ctk
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+# Define your Gmail credentials file path
+CREDENTIALS_FILE = 'C:/Users/honey/Desktop/Tkinter/configfile/client_secret_871121971297-urmfttlkk8sfkl6pqoosjbqn3gs1m930.apps.googleusercontent.com.json'
+
+# Define the Gmail API scope
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+
+# Sets the appearance of the window
+# Supported modes : Light, Dark, System
+ctk.set_appearance_mode("System")   
+ 
+# Sets the color of the widgets in the window
+# Supported themes : green, dark-blue, blue    
+ctk.set_default_color_theme("dark-blue")    
+
+# Dimensions of the window
+appWidth, appHeight = 450, 300
+
+class OTPSenderApp:
+    def __init__(self, master):
+        self.emailWin = master
+        self.emailWin.title("User Two Factor Authentication")
+        self.emailWin.geometry(f"{appWidth}x{appHeight}")   
+
+        self.emailpage_label = ctk.CTkLabel(master, text="Please verify that it's you.", font=('Helvetica', 25 , 'bold'))
+        self.email_label = ctk.CTkLabel(master, text="Enter recipient's email:")
+        self.email_entry = ctk.CTkEntry(master)
+        self.send_button = ctk.CTkButton(master, text="Send OTP", command=self.send_otp)
+
+        self.emailpage_label.pack(padx=20, pady=20)
+        self.email_label.pack(padx=20, pady=20)
+        self.email_entry.pack(padx=20, pady=20, ipadx=60)
+        self.send_button.pack(padx=20, pady=20)
+
+    def generate_otp(self):
+        # Generate a 6-digit OTP
+        return str(pyotp.TOTP(pyotp.random_base32()).now())
+
+    def get_gmail_credentials(self):
+        flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+        creds = None
+
+        if os.path.exists('token.json'):
+            creds = Credentials.from_authorized_user_file('token.json')
+
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                auth_url, _ = flow.authorization_url(prompt='consent')
+                webbrowser.open(auth_url)
+                code = input('Enter the authorization code: ')
+                creds = flow.fetch_token(code=code)
+
+            with open('token.json', 'w') as token:
+                token.write(creds.to_json())
+
+        return creds
+
+    def send_otp_email(self, email, otp):
+        credentials = self.get_gmail_credentials()
+        token = credentials.token
+        encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
+
+        message = f"Subject: Your OTP Code\n\nYour OTP code is: {otp}"
+
+        os.system(f'curl -s --user "oauth2:{encoded_token}" '
+                  f'-X "https://www.googleapis.com/gmail/v1/users/me/messages/send" '
+                  f'--header "Content-Type: application/json" '
+                  f'--data \'{{"raw":"{base64.urlsafe_b64encode(message.encode()).decode()}"}}\'')
+
+    def send_otp(self):
+        recipient_email = self.email_entry.get()
+
+        if not recipient_email:
+            tk.messagebox.showerror("Error", "Please enter the recipient's email.")
+            return
+
+        otp = self.generate_otp()
+        self.send_otp_email(recipient_email, otp)
+        tk.messagebox.showinfo("Success", f"OTP sent successfully to {recipient_email}.")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    otp_sender_app = OTPSenderApp(root)
+    root.mainloop()
