@@ -1,0 +1,133 @@
+import tkinter as tk
+import customtkinter as ctk
+import random
+import ssl
+import smtplib
+from tkinter import messagebox
+from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.message import EmailMessage
+
+# Sets the appearance of the window
+# Supported modes : Light, Dark, System
+ctk.set_appearance_mode("System")   
+ 
+# Sets the color of the widgets in the window
+# Supported themes : green, dark-blue, blue    
+ctk.set_default_color_theme("dark-blue")    
+
+# Dimensions of the window
+appWidth, appHeight = 450, 300
+
+
+'''def get_email():
+    recp_email = email_entry.get()
+    print(recp_email)
+    get_email()'''
+
+def validate_email():
+    entry_email = email_entry.get()
+
+    if not entry_email:
+        messagebox.showerror("Error", "Please enter a valid email.")
+    else:
+        open_new_window()
+
+
+def validate_OTP():
+    entry_OTP = OTPentry.get()
+    if not entry_OTP:
+        messagebox.showerror("Error", "Please enter your OTP.")
+    else:
+        None
+
+#after SendOTP button is clicked:
+def open_new_window():
+    OTPwindow = ctk.CTkToplevel(master)
+    OTPwindow.title("User Two Factor Authentication")
+    OTPwindow.geometry(f"{appWidth}x{appHeight}")
+       
+    
+    # Add widgets and layout for the new window
+    OTPlabel = ctk.CTkLabel(OTPwindow, text="Please enter the OTP code sent to your email.")
+    OTPentry = ctk.CTkEntry(OTPwindow)
+    OTPbutton = ctk.CTkButton(OTPwindow, text="I've verified.", command = validate_OTP)
+
+    OTPlabel.pack(padx = 20, pady = 20)
+    OTPentry.pack(padx = 20, pady = 20)
+    OTPbutton.pack(padx = 20, pady = 20)
+
+
+#app GUI
+'''class OTPSenderApp:
+    def __init__(self, master):'''
+
+master = ctk.CTk()
+emailWin = master
+emailWin.title("User Two Factor Authentication")
+emailWin.geometry(f"{appWidth}x{appHeight}")   
+
+emailpage_label = ctk.CTkLabel(master, text="Please verify that it's you.", font=('Helvetica', 25 , 'bold'))
+email_label = ctk.CTkLabel(master, text="Enter your email:")
+email_entry = ctk.CTkEntry(master)
+send_button = ctk.CTkButton(master, text="Send OTP", command = validate_email)
+
+emailpage_label.pack(padx=20, pady=20)
+email_label.pack(padx=20, pady=10)
+email_entry.pack(padx=20, pady=10, ipadx=60)
+send_button.pack(padx=20, pady=20)
+
+def sendOTP():
+# Selects a random number from 0 to 1,000,000
+    x = random.randint(0, 1000000)
+
+# If x is less than 6-digits, this adds extra zeros in the front until x is 6-digits
+    if x < 100000:
+        x = "%06d" % x
+
+# Sender's email
+    sender = 'join.mmunow@gmail.com'
+    # 16-character password as determined by the sender's App Passwords
+    password = "abvo sqia kufp vtoo"
+    # Recipient(s) email
+    recipient = "honeybutterchiaps@gmail.com"
+
+    #email subject/header
+    subject = 'Python Tkinter Application: User Login Request'
+
+    time = datetime.now().strftime('%I:%M:%S %p, %d %b %Y')
+
+    # Email body
+    html = f"""
+    <html>
+        <body>
+            <p style="font-size: 25px;"><b>2-Step Verification Code: {x}</b></p>
+            <p>Hello,<br><br>
+                <b>{x}</b> is your 2-Step Verification code.<br><br>
+                Enter the above code into the 2-Step Verification screen to finish logging in. This code will expire in 5 minutes.
+            </p>
+            <p style="font-size: 10.5px; color:gray">IMPORTANT: You are receiving this email because there was a login attempt from a new browser or device.<br>If you did not make this request, you are strongly advised to change your password.</p>
+            <p>This message was sent at {time}</p>
+        </body>
+    </html>
+    """
+
+    # Formats the email
+    em = MIMEMultipart("alternative")
+    em['From'] = sender
+    em['To'] = recipient
+    em['Subject'] = subject
+
+    body = MIMEText(html, "html")
+    em.attach(body)
+    context = ssl.create_default_context()
+
+    # Connects to Gmail's smtp domain and logs into the sender's account to send the email
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(sender, password)
+        smtp.sendmail(sender, recipient, em.as_string())
+
+master.mainloop()
