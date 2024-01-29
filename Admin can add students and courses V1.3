@@ -1,0 +1,181 @@
+import sqlite3
+import tkinter as tk
+import customtkinter as ctk
+from tkinter import messagebox
+from tkinter import ttk
+import phonenumbers
+
+
+class Student:
+    def __init__(self, name, SID):
+        self.name = name
+        self.SID = SID
+
+class CourseRegistrationApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Admin can add/remove/update students and courses")
+        self.master.geometry('900x600')
+        self.master.configure(bg='#292929')
+
+        # Initialize list to store student records
+        self.students = []
+        self.courses = []
+        
+       # Create frames
+        self.frameM1 = ctk.CTkFrame(master, fg_color='transparent', corner_radius=12)
+        self.frameM1.pack(fill='both',expand=True, padx=20, pady=20)
+      
+        # Create tabs (stu_tab and cou_tab is students' credentials and courses' credentials respectively)
+        self.creds = ctk.CTkTabview(self.frameM1)
+        self.creds.pack(fill='both', expand=True, padx=10, pady=10)
+
+        self.stu_tab = self.creds.add("Students")
+        self.frameL1 = ctk.CTkFrame(self.stu_tab, fg_color='white', corner_radius=12)
+        self.frameL1.pack(side='left',fill='both',padx=20, pady=20, expand=True)
+        self.frameR1 = ctk.CTkFrame(self.stu_tab, fg_color='transparent', corner_radius=12)
+        self.frameR1.pack(side='left',fill='y', padx=20, pady=20, ipady=20)
+        self.cou_tab = self.creds.add("Courses")
+
+
+        # Create labels and entry widgets for student information
+        country_codes = ["+60(MAL)", "+1(US)", "+44(UK)", "+81(JPN)", "+86(CN)", "+91(IND)", "+254(KE)", "+61(AUS)", "+27(ZA)"]
+
+        self.label_SID = ctk.CTkLabel(self.frameR1, text="Student ID:",bg_color='transparent')
+        self.entry_SID = ctk.CTkEntry(self.frameR1,placeholder_text="(1221101234)",bg_color='transparent')
+
+        self.label_name = ctk.CTkLabel(self.frameR1, text="Name:",bg_color='transparent')
+        self.entry_name = ctk.CTkEntry(self.frameR1,placeholder_text="(NATHALIE ELBES)", bg_color='transparent')
+
+        self.label_IC = ctk.CTkLabel(self.frameR1, text="IC number:",bg_color='transparent')
+        self.entry_IC = ctk.CTkEntry(self.frameR1, placeholder_text="(040330-00-1234)", placeholder_text_color='grey', bg_color='transparent')
+
+        self.label_ctry = ctk.CTkLabel(self.frameR1, text="Country Code:",bg_color='transparent')
+        self.combo_ctry = ctk.CTkComboBox(self.frameR1, values=country_codes, state="readonly", bg_color='transparent')
+
+        self.label_telno = ctk.CTkLabel(self.frameR1, text="Phone number:",bg_color='transparent')
+        self.entry_telno = ctk.CTkEntry(self.frameR1, placeholder_text="+60 (12-1235678)", placeholder_text_color='grey', bg_color='transparent')
+
+        '''self.label_email = ctk.CTkLabel(self.frameR1, text="Email:",bg_color='transparent')
+        self.entry_email = ctk.CTkEntry(self.frameR1, placeholder_text="1221101234@gmail.com", placeholder_text_color='grey', bg_color='transparent')'''
+
+        '''self.label_IC = ctk.CTkLabel(self.frameR1, text="IC number:",bg_color='transparent')
+        self.entry_IC = ctk.CTkEntry(self.frameR1, placeholder_text="040330-00-1234", placeholder_text_color='grey', bg_color='transparent')'''
+
+        # Create buttons for actions
+        self.button_add = ctk.CTkButton(self.frameR1, text="Add Student", command=self.add_student,bg_color='transparent')
+        self.button_remove = ctk.CTkButton(self.frameR1, text="Remove Student", command=self.remove_student,bg_color='transparent')
+        self.button_update = ctk.CTkButton(self.frameR1, text="Save Changes", command=self.update_student,bg_color='transparent')
+
+        # Place widgets in the grid
+        self.label_SID.grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
+        self.entry_SID.grid(row=0, column=1, padx=5, pady=5)
+
+        self.label_name.grid(row=1, column=0, padx=10, pady=10, sticky=tk.E)
+        self.entry_name.grid(row=1, column=1, padx=5, pady=5)
+    
+        self.label_IC.grid(row=2, column=0, padx=5, pady=5, sticky=tk.E)
+        self.entry_IC.grid(row=2, column=1, padx=5, pady=5)
+
+        self.label_ctry.grid(row=3, column=0, padx=5, pady=5, sticky=tk.E)
+        self.combo_ctry.grid(row=3, column=1, padx=5, pady=5)
+
+        self.label_telno.grid(row=4, column=0, padx=5, pady=5, sticky=tk.E)
+        self.entry_telno.grid(row=4, column=1, padx=5, pady=5)
+                              
+        self.button_add.grid(row=5, column=0, columnspan=2, pady=10)
+        self.button_remove.grid(row=6, column=0, columnspan=2, pady=10)
+        self.button_update.grid(row=7, column=0, columnspan=2, pady=10)
+
+    def add_student(self):
+        NAME = self.entry_name.get().upper()
+        SID = self.entry_SID.get()
+
+        if NAME and SID:
+            student = Student(NAME, SID)
+            self.students.append(student)
+            messagebox.showinfo("Success", f"Student {NAME} added successfully!")
+            self.clear_entries()
+        else:
+            messagebox.showwarning("Warning", "Please fill everything in.")
+
+        # Connect to SQLite database (or create a new one if it doesn't exist)
+            conn = sqlite3.connect('trial.db')
+            cursor = conn.cursor()
+
+        # Create a table if it doesn't exist (ADJUST ACCORDINGLY) 
+            table_students='''
+                CREATE TABLE IF NOT EXISTS students (
+                    student_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    ic_num INTEGER NOT NULL,
+                    email TEXT NOT NULL,
+                    country TEXT NOT NULL,
+                    phone_number INTEGER NOT NULL )'''
+            cursor.execute(table_students)
+
+            table_courses='''
+                CREATE TABLE IF NOT EXISTS students (
+                    student_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    course_id INTEGER NOT NULL,
+                    course_name TEXT NOT NULL,
+                    FOREIGN KEY (student_id) REFERENCES students(students_id)
+                    )'''
+            cursor.execute(table_courses)
+
+            # Insert data into the table
+            cursor.execute('INSERT INTO students (student_id, name, ic_num, email, country, phone_number) VALUES (?, ?, ?, ?, ?, ?)', (NAME, SID))
+
+            # Commit changes and close the connection
+            conn.commit()
+            conn.close()
+
+            # Clear entry boxes after submitting
+            self.entry_NAME.delete(0, tk.END)
+            self.entry_SID.delete(0, tk.END)
+
+
+    def remove_student(self):
+        SID = self.entry_SID.get()
+
+        for student in self.students:
+            if student.SID == SID:
+                self.students.remove(student)
+                messagebox.showinfo("Success", f"Student with ID {SID} removed successfully!")
+                self.clear_entries()
+                return
+
+        messagebox.showwarning("Warning", f"No student found with ID {SID}.")
+
+    def update_student(self):
+        SID = self.entry_SID.get()
+
+        for student in self.students:
+            if student.SID == SID:
+                new_name = self.entry_name.get()
+                student.name = new_name
+                messagebox.showinfo("Success", f"Student information updated successfully!")
+                self.clear_entries()
+                return
+
+        messagebox.showwarning("Warning", f"No student found with ID {SID}.")
+
+    def clear_entries(self):
+        self.entry_name.delete(0, tk.END)
+        self.entry_SID.delete(0, tk.END)
+            
+        # Create and place treeview
+        tree = ttk.Treeview(self.frameL1, columns=('Student ID', 'Name', 'IC number', 'Email', 'Country code', 'Phone number'), show='headings')
+        tree.heading('Student ID', text='ID')
+        tree.heading('Name', text='Name')
+        tree.heading('IC number', text='IC number')
+        tree.heading('Email', text='Email')
+        tree.heading('Country code', text='Country code')
+        tree.heading('Phone number', text='Phone number')
+        tree.place(x=0, y=0)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = CourseRegistrationApp(root)
+    root.mainloop()
